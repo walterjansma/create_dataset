@@ -15,7 +15,8 @@ pose_key = "odometry_enu"
 traj_key = "trajectory"
 map_key = "map"
 rectangle_key = "rectangle"
-directory = "/mppi_bags/"
+directory = "/data_bags/"
+folder = "/create_dataset/"
 bag_name = 'test'
 
 class Map:
@@ -26,11 +27,33 @@ class Map:
 
 
 def main():
-    
+    """
     # Get names of all bag files
     bag_files = getBagNames()
-    
-    bag = rosbag.Bag(home + '/mppi_bags/' + bag_files[0])
+
+    #print(bag_files)
+
+    data = []
+    agents = 0
+
+    for file in bag_files:
+
+        # Load data
+        bag = rosbag.Bag(home + '/data_bags/' + file)
+        pose_topics = load_topics(bag, pose_key)
+        num_agents, pos_data = read_pose_data_new(bag, pose_topics)
+
+        pos_data = reindex_agents(pos_data, agents)
+
+        agents = agents + num_agents
+
+        data.append(pos_data)
+
+    save_to_file(data)
+    """
+    data = np.genfromtxt(home + folder + "datafile.csv", delimiter=",")[1:,:]
+
+    print(data[20000,:])
 
     #topics = bag.get_type_and_topic_info()[1].keys()
 
@@ -39,11 +62,7 @@ def main():
     #messages = []
     #for topic, msg, t in bag.read_messages(topics=topics[0]):
     #	messages.append(msg)
-    
-    pose_topics = load_topics(bag, pose_key)
-
-    pos_data = read_pose_data(bag, pose_topics)
-    
+    """
 
     diff = []
     diff_ = []
@@ -64,13 +83,20 @@ def main():
 
     print(pos_data['roboat_0'][10][5])
     print(pos_data['roboat_1'][10][5])
+    """
 
-    #save_to_file(pos_data)
-    
-    """
-    for i in range(10):
-        print(pos_data['roboat_0'][i][5])
-    """
+def reindex_agents(data, agents):
+
+    for i in range(len(data)):
+        if data[i][0] == 0:
+            data[i][0] = agents + 1
+        elif data[i][0] == 1:
+            data[i][0] = agents + 2
+        elif data[i][0] == 2:
+            data[i][0] = agents + 3
+
+    return data
+
 
 def save_to_file(data):
     """
@@ -78,13 +104,13 @@ def save_to_file(data):
     """
     fields = ['id', 'timestep_s', 'timestep_ns', 'pos_x', 'pox_y', 'yaw', 'vel_x', 'vel_y', 'omega', 'goal_x', 'goal_y' ]
 
-    with open('datafile', 'w') as f:
-      
-        # using csv.writer method from CSV package
+    with open('datafile.csv', 'w') as f:
+
         write = csv.writer(f)
-      
         write.writerow(fields)
-        write.writerows(data)
+
+        for i in range(len(data)):
+            write.writerows(data[i])
 
 def getBagNames():
     """
@@ -95,7 +121,7 @@ def getBagNames():
         for file in files:
             if file.endswith('.bag'):
                 bag_files.append(file)
-    
+
     return bag_files
 
 def load_topics(bag, key = None):
@@ -153,7 +179,7 @@ def read_pose_topic_new(bag, topic):
     data = np.asarray(data)
     #print(data.shape)
 
-    return data
+    return topic_name, data
 
 
 def read_pose_topic(bag, topic):
@@ -182,8 +208,8 @@ def read_pose_topic(bag, topic):
 
             entry = (msg.pose.pose.position.x,
                      msg.pose.pose.position.y,
-                     yaw, 
-                     msg.twist.twist.linear.x, 
+                     yaw,
+                     msg.twist.twist.linear.x,
                      msg.twist.twist.linear.y,
                      time)
         else:
@@ -201,13 +227,15 @@ def read_pose_data_new(bag, topic_list):
     Return a dictionairy of all data on the topics in the input
     """
     datalist = []
+    agents = []
     for topic in topic_list:
-        data = read_pose_topic_new(bag, topic)
+        topic, data = read_pose_topic_new(bag, topic)
+        agents.append(topic)
         datalist.append(data)
 
     flat_list = [item for sublist in datalist for item in sublist]
 
-    return flat_list
+    return len(agents), flat_list
 
 def read_pose_data(bag, topic_list):
     """
