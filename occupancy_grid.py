@@ -126,7 +126,7 @@ class OccupancyGrid():
 
     return self.gridmap[start_idx_x:end_idx_x, start_idx_y:end_idx_y], debug_info
 
-  def getFrontSubmapByCoords(self, center_pos_x, center_pos_y, size_x, size_y,grid_map):
+  def getFrontSubmapByCoords(self, center_pos_x, center_pos_y, size_x, size_y, grid_map):
     """
     Get submap around specified coordinates.
     The sizes in x and y direction are within the same coordinate frame as the center coordinates.
@@ -156,8 +156,22 @@ class OccupancyGrid():
     else:
       dy_end = max_idx_y-start_idx_y
 
+    print(start_idx_x, end_idx_x, start_idx_y, end_idx_y)
+    print(grid_map.shape)
+
     grid[0:dx,dy:dy_end] = grid_map[start_idx_x:end_idx_x,start_idx_y:end_idx_y]
     return grid
+
+  def plot_map(self, map, ax):
+    ax.imshow(map.data,
+             extent = (map.origin[0], map.origin[0] + map.size[0] * map.resolution,
+                       map.origin[1], map.origin[1] + map.size[1] * map.resolution),
+             cmap='gray_r')
+    ax.set_facecolor('#262626')
+    ax.set_xlabel('x [m]')
+    ax.set_ylabel('y [m]')
+    ax.yaxis.set_label_coords(-0.08, .5)
+    ax.xaxis.set_label_coords(0.5, -0.09)
 
 
 def main():
@@ -166,6 +180,31 @@ def main():
     grid.resolution = map.resolution
     grid.map_size = map.size
     grid.center = map.origin
+    grid.gridmap = map.data[:,:,0]
+
+    pos_x = 0
+    pos_y = 0
+
+    size_x = 50
+    size_y = 50
+
+    idx, idy = grid.getIdx(80,80)
+
+    #print(idx, idy)
+    #print(grid.gridmap.shape)
+
+    #patch_ = grid.getFrontSubmapByCoords(pos_x, pos_y, size_x, size_y, grid.gridmap)
+    patch_, __= grid.getSubmapByIndices(idx, idy, size_x, size_y)
+
+    test = grid.getSubmapByCoords(pos_x, pos_y, size_x, size_y)
+
+    print(test.shape)
+
+    fig, ax = plt.subplots()
+    #ax.imshow(patch_, cmap='gray_r')
+    #grid.plot_map(map, ax)
+    ax.imshow(test, cmap='gray_r')
+    plt.show()
 
 if __name__ == "__main__":
     main()

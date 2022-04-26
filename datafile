@@ -1,0 +1,4 @@
+id,timestep_s,timestep_ns,pos_x,pox_y,yaw,vel_x,vel_y,omega,goal_x,goal_y
+r,o,b,o,a,t,_,2
+r,o,b,o,a,t,_,0
+r,o,b,o,a,t,_,1

@@ -1,7 +1,7 @@
 from os import error
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
+#import pandas as pd
 import rosbag
 import os
 from scipy.spatial.transform import Rotation as R
@@ -34,16 +34,20 @@ def main():
     bag = rosbag.Bag(home + '/mppi_bags/' + bag_name + '.bag')
 
     # Load roboat odometry topics
-    pose_topics = load_topics(bag, pose_key)
+    #pose_topics = load_topics(bag, pose_key)
 
-    pose_data = read_pose_data(bag, pose_topics)
+    #pose_data = read_pose_data(bag, pose_topics)
 
-    print(pose_data['roboat_0'][0]) # output = [ x, y, heading, np.datetime64()]
+    #print(pose_data['roboat_0'][0]) # output = [ x, y, heading, np.datetime64()]
     step_size = 30
 
-    plot_map(Map, ax)
-    plot_poses(pose_data, ax, step_size = step_size)
-    plt.show()
+    #print(Map, ax)
+
+    #plot_map(Map, ax)
+    #plot_poses(pose_data, ax, step_size = step_size)
+    #plt.show()
+
+    data = read_pose_data(bag)
 
     """
     #target1 = bag.message_by_topic('waypoint_target/roboat_1')
