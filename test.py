@@ -16,7 +16,7 @@ traj_key = "trajectory"
 map_key = "map"
 rectangle_key = "rectangle"
 
-bag_name = 'test'
+bag_name = 'test2'
 
 class Map:
     size = [1715, 881]
