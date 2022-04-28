@@ -27,7 +27,7 @@ class Map:
 
 
 def main():
-    """
+
     # Get names of all bag files
     bag_files = getBagNames()
 
@@ -35,6 +35,10 @@ def main():
 
     data = []
     agents = 0
+    two = 0
+    three = 0
+
+    #bag_files = bag_files[0:2]
 
     for file in bag_files:
 
@@ -43,6 +47,11 @@ def main():
         pose_topics = load_topics(bag, pose_key)
         num_agents, pos_data = read_pose_data_new(bag, pose_topics)
 
+        if num_agents == 2:
+            two += 1
+        elif num_agents == 3:
+            three += 1
+
         pos_data = reindex_agents(pos_data, agents)
 
         agents = agents + num_agents
@@ -50,10 +59,10 @@ def main():
         data.append(pos_data)
 
     save_to_file(data)
-    """
-    data = np.genfromtxt(home + folder + "datafile.csv", delimiter=",")[1:,:]
+    print(two, three)
+    #data = np.genfromtxt(home + folder + "datafile.csv", delimiter=",")[1:,:]
 
-    print(data[20000,:])
+    #print(data[20000,:])
 
     #topics = bag.get_type_and_topic_info()[1].keys()
 
@@ -174,10 +183,14 @@ def read_pose_topic_new(bag, topic):
         else:
             print("Unkown msg type: ", msg_type)
             continue
+
+
         data.append(entry)
         topic_name = extract_ns_from_topic(topic)
-    data = np.asarray(data)
-    #print(data.shape)
+
+    # Remove first 10 and last 10 (1 sec) of each roboat data
+    data = np.asarray(data[10:-10])
+
 
     return topic_name, data
 
